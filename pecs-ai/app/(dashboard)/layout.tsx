@@ -6,8 +6,9 @@ const DashboardLayout = ({
 }: {
     children: React.ReactNode
 }) => {
-    return(
-        <div className=" h-full relative">
+    
+        return(
+        <div className=" h-full relative" style={{background: 'linear-gradient(45deg, purple, white, darkblue)'}}>
             <div className="hidden h-full md:flex md:w-72 md:flex-col md:fixed md:inset-y-0 -[8-] bg-gray-900" >
             <SideBar />
             </div>

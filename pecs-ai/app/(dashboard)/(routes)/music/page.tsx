@@ -5,7 +5,7 @@ import * as z from "zod";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import Heading from "@/components/heading"
-import { Code, MessageCircleDashedIcon, MessageSquare } from "lucide-react";
+import { MessageCircleDashedIcon, MessageSquare, Music2Icon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { formSchema } from "./constants";
 import { Form, FormField, FormItem, FormControl } from "@/components/ui/form";
@@ -16,14 +16,12 @@ import { useState } from "react";
 import OpenAI, { ChatCompletionRequestMessage } from 'openai';
 import { Empty } from "@/components/Empty";
 import { Loader } from "@/components/Loader";
-import { cn } from "@/lib/utils";
-import { UserAvatar } from "@/components/user-avatar";
-import { BotAvatar } from "@/components/bot-avatar";
-import ReactMarkdown from "react-markdown";
 
-const CodePage = () => {
+
+
+const MusicPage = () => {
     const router = useRouter();
-    const [messages, setMessages] =  useState<ChatCompletionRequestMessage[]>([]);
+    const [music, setMusic] = useState<string>();
     
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -38,19 +36,10 @@ const CodePage = () => {
     const onSubmit = async(values:z.infer<typeof formSchema>) => {
         try {
 
-            const userMessage: ChatCompletionRequestMessage ={
-                role: "system",
-                content:values.prompt,
-              };
+            setMusic(undefined)
 
-            const newMessages = [...messages, userMessage];
-
-            const response = await axios.post("/api/code", {
-                messages: newMessages,
-            });
-
-            setMessages((current) => [...current, userMessage, response.data]);
-
+            const response = await axios.post("/api/music", values);
+            setMusic(response.data);
             form.reset();
         } catch (error: any) {
             //TODO:Open Pro Model
@@ -61,17 +50,17 @@ const CodePage = () => {
     };
 
     return (
-        <div >
-        <Heading title={"Code Generation"}
-         description={"Genrate code from text"} 
-         icon={Code} 
-         color={"text-green-500"} 
-         iconColor={"text-green-500"} 
-         bgColor={"bg-green-700/10"}/>
+        <div>        
+        <Heading title={"Music"}
+         description={"Turn your prompt into music"} 
+         icon={Music2Icon} 
+         color={"text-emerald-500"} 
+         iconColor={"text-emerald-500"} 
+         bgColor={"text-emerald-700/10"}/>
 
-            <div className="px-4 lg:px-8 "  >
-                <div >
-                    <Form  {...form}>
+            <div className="px-4 lg:px-8">
+                <div>
+                    <Form {...form}>
                         <form
                             onSubmit={form.handleSubmit(onSubmit)}
                             className="
@@ -97,7 +86,7 @@ const CodePage = () => {
                                                 focus-visible:ring-0
                                                 focus-visible:ring-transparent"
                                                 disabled={isLoading}
-                                                placeholder="Simple toggle button using react hooks"
+                                                placeholder="Piano Solo"
                                                 {...field}
                                                 />
                                         </FormControl>
@@ -118,48 +107,22 @@ const CodePage = () => {
                         </div>
                         
                         )}
-                    {messages.length === 0 && !isLoading && (
+                    {!music && !isLoading && (
                             <Empty label="No conversation started"/>
 
                         )}
 
+                        {music&&(
+                            <audio controls 
+                            className="w-full mt-8">
+                                <source src={music}/>
 
-
-                    <div className="flex flex-col-reverse gap-y-4">
- 
-                        {messages.map((message) =>(
-                                <div 
-                                key={message.content}
-                                className={cn("p-8 w-full flex items-start gap-x-8 rounded-lg",
-                                message.role === "assistant" ? "bg-white border border-black/10": "bg-muted"
-                                )}
-                                
-                                >
-                                {message.role === "assistant" ?<UserAvatar/>:<BotAvatar/>}                                    
-                                <ReactMarkdown
-                                 components={{
-                                    pre: ({node, ...props}) => (
-                                        <div className="overflow-auto w-full my-2 bg-black/10 p-2 rounded-lg"
-                                        >
-                                            <pre {...props}/>
-                                        </div>
-                                    ),
-                                    code: ({node, ...props}) => (
-                                        <code className="bg-black/10 rounded-lg p-1" {...props}/>
-                                    )
-                                 }}
-                                 className="text-sm overflow-hidden leading-70"
-                                >
-                                    {message.content || ""}
-                                </ReactMarkdown>
-
-                                </div>
-                            ))}
-                    </div>
+                            </audio>
+                        )}
                 </div>
             </div>
         </div>
     );
 }
 
-export default CodePage;
+export default MusicPage;
