@@ -1,3 +1,6 @@
-cd pecs-ai
+cd pecs-ai 
+
 npm install
+
+
 npm run dev
